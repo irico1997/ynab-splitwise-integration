@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class SplitwiseExpense {
 
@@ -33,6 +34,7 @@ public class SplitwiseExpense {
         String desc = obj.getString("description");
         boolean paid = obj.getBoolean("payment");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date created_at = null;
         Date updated_on = null;
         Date deleted_at = null;
@@ -49,9 +51,11 @@ public class SplitwiseExpense {
 
         double cost = 0;
 
-        if (!obj.get("deleted_by").toString().equalsIgnoreCase("null")) {
-            return null;
-        }
+        // if (!obj.get("deleted_by").toString().equalsIgnoreCase("null")) {
+        //     Logger.log(String.format("Deleted at: ", deleted_at.toString()));;
+        //     Logger.log(String.format("Deleted by: ", obj.get("deleted_by").toString()));
+        //     return null;
+        // }
 
         JSONArray repayments = obj.getJSONArray("repayments");
         for (Object repaymentObj : repayments) {
@@ -84,7 +88,8 @@ public class SplitwiseExpense {
 
     @Override
     public String toString() {
-        return String.format("Expense: [desc: %s, cost: %f, date: %s]", this.description, this.cost, this.created_at);
+        return String.format("Expense: [desc: %s, cost: %f, created_at: %s, updated_at: %s, deleted_at: %s, id: %s]",
+            this.description, this.cost, this.created_at, this.updated_on, this.deleted_at, this.id);
     }
 
 }

@@ -77,18 +77,26 @@ public class YNABHandler {
             Logger.log("Exception raised when authenticating!");
             Logger.log(e);
         }
+        Logger.log(String.format("Initialized YNAB: %s", this.toString()));
+    }
 
+
+    public SaveTransaction buildTransaction(double amount, String description, Date date) {
+        SaveTransaction transaction = new SaveTransaction();
+        transaction.setAccountId(this.accountUUID);
+        transaction.setAmount((new BigDecimal(amount * 1000)).setScale(0, RoundingMode.HALF_UP));
+        transaction.setApproved(false);
+        transaction.setCleared(SaveTransaction.ClearedEnum.CLEARED);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        transaction.setDate(LocalDate.parse(dateFormat.format(date)));
+        transaction.setMemo(description);
+        return transaction;
     }
 
     public void addTransaction(double amount, String description, Date date) {
         try {
-            SaveTransaction transaction = new SaveTransaction();
-            transaction.setAccountId(this.accountUUID);
-            transaction.setAmount((new BigDecimal(amount * 1000)).setScale(0, RoundingMode.HALF_UP));
-            transaction.setApproved(false);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            transaction.setDate(LocalDate.parse(dateFormat.format(date)));
-            transaction.setMemo(description);
+            SaveTransaction transaction = buildTransaction(amount, description, date);
+            Logger.log(String.format("Adding transaction:\n%s", transaction.toString()));
             transactionsApi.createTransaction(this.budgetUUID, new SaveTransactionWrapper().transaction(transaction));
         } catch (ApiException e) {
             Logger.log(e);
@@ -98,6 +106,7 @@ public class YNABHandler {
     public List<TransactionDetail> getTransactionsSince(Date since) {
         try {
             LocalDate localDate = DateTimeUtils.toLocalDate(new java.sql.Date(since.getTime()));
+            Logger.log(String.format("Config before getTransactionsSince: %s\nDate: ", this.toString(), localDate.toString()));
             TransactionsResponse transactionsResponse
                     = this.transactionsApi.getTransactionsByAccount(this.budgetUUID, this.accountUUID, localDate);
             return transactionsResponse.getData().getTransactions();
@@ -109,10 +118,16 @@ public class YNABHandler {
 
     public void updateTransaction(UUID transactionUUID, SaveTransaction saveTransaction) {
         try {
+            Logger.log(String.format("Updating transaction:\n%s\nYNAB: %s", saveTransaction.toString(), this.toString()));
             this.transactionsApi.updateTransaction(budgetUUID, transactionUUID, new SaveTransactionWrapper().transaction(saveTransaction));
         } catch (ApiException e) {
             Logger.log(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[budgetName: %s, accountName: %s, accessToken: %s, budgetUUID: %s, accountUUID: %s]", this.budgetName, this.accountName, this.accessToken, this.budgetUUID, this.accountUUID);
     }
 
 
