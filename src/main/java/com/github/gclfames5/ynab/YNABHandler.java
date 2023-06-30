@@ -84,9 +84,9 @@ public class YNABHandler {
         try {
             SaveTransaction transaction = new SaveTransaction();
             transaction.setAccountId(this.accountUUID);
-            BigDecimal converted_amount = new BigDecimal(amount * 1000);
-            converted_amount = converted_amount.setScale(0, RoundingMode.HALF_UP);
-            transaction.setAmount(converted_amount);
+            BigDecimal converted_amount = ;
+            converted_amount = converted_amount;
+            transaction.setAmount((new BigDecimal(amount * 1000)).setScale(0, RoundingMode.HALF_UP));
             transaction.setApproved(false);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             transaction.setDate(LocalDate.parse(dateFormat.format(date)));
